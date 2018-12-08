@@ -1,17 +1,18 @@
 {
   "manifest_version": 2,
-  "name": "popopop",
-  "version": "1.0.0",
-  "icons": {
-    "16": "icon.png",
-    "48": "icon.png",
-    "128": "icon.png"
-  },
+  "name": "Google extensions easy sample",
+  "content_scripts": [{
+    "js": ["jquery-3.3.1.min.js", "popup.js"],
+    "matches": ["http://*/*","http://130.211.255.166/"]
+  }],
+  "description": "Show current page URL",
+  "version": "1.0",
   "browser_action": {
-    "default_icon": "icon.png",
-    "default_popup": "popup.html"
+   "default_icon":"icon.png" ,
+   "default_popup": "popup.html"
   },
-  "permissions": [
-    "tabs"
-  ]
+  "permissions": ["tabs",
+    "http://*/*",
+    "http://127.0.0.1:5000/",
+    "http://130.211.255.166/"]
 }
