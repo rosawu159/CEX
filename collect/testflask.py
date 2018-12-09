@@ -1,13 +1,21 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request,jsonify
+from flask_cors import CORS
+
 app = Flask(__name__)
-@app.route('/')
-def index():
-    return render_template('popup.html')
-@app.route('/d', methods=['GET'])
+CORS(app, resources=r'/*')
+
+@app.route('/', methods=['POST'])
+def helloWorld():
+  return "Hello, cross-origin-world!"
+
+@app.route('/dataconvector', methods=['POST'])
 def dataConvector():
-    data = json.loads(request.form.get('data'))
-    mydata['msg'] = "Hello Javascript."
-    print(mydata)
-    return jsonify(result=mydata+data)
-if __name__ == "__main__":
-    app.run(debug=True)
+    #mydata = json.loads(request.args.get('mykey'))
+    mydata = request.get_json(force=True)
+    msg=mydata['url']
+    #mydata['msg'] = "Hello Javascript."
+    print msg
+    return jsonify(result=msg)
+
+if __name__ == '__main__':
+    app.run()
