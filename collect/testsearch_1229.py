@@ -22,14 +22,20 @@ def getwhois():
     #check if address is in Taiwan
     isTW = s.text.find('Taiwan')
     if isTW < 0:
-        print("WARNING: The address this company registerd isn't in Taiwan.")
-        unsafeScore += 1
+        if s.text.find('Registrant Country: TW') < 0:
+            print("WARNING: The address this company registerd isn't in Taiwan.")
+            unsafeScore += 1
 
     #check if certificate's expiry date is too short
     expDate = s.text.find('expires on 20')
     upDate = s.text.find('Updated: 20')
     expYear = s.text[expDate+13] + s.text[expDate+14]
     upYear = s.text[upDate+11] + s.text[upDate+12]
+
+    if expDate == -1:
+        expDate = s.text.find('Expiration Date: 20')
+        if expDate != -1:
+            expYear = s.text[expDate+19] + s.text[expDate+20]
 
     if expDate < 0:
         print("WARNING: Can't find the certificate's expiry date of this company.")
@@ -38,8 +44,8 @@ def getwhois():
         iexpYear = int(expYear)
         iupYear = int(upYear)
         if iexpYear - iupYear <= 1:
-            print("WARNING: The certificate's effective period is shorter than 1 year.")
-            unsafaScore += 1
+            print("WARNING: The certificate's effective duration is shorter than 1 year.")
+            unsafeScore += 1
 
 def niz104():
     google_url = 'https://www.google.com.tw/search?q=site:www.104.com.tw+ '
@@ -51,7 +57,7 @@ def niz104():
       for i in items:
         #print(i.text)
         companyutf8=i.text.encode('utf8')
-        comp=companyutf8.split('¡Õ')
+        comp=companyutf8.split('ï¼œ')
         compfind=comp[0].find('_')
         if compfind>=0:
             i1=comp[0].split('_')
