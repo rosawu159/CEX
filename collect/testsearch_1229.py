@@ -48,15 +48,23 @@ def getwhois():
             unsafeScore += 1
 
 def niz104():
+    global unsafeScore
     google_url = 'https://www.google.com.tw/search?q=site:www.104.com.tw+ '
     r = requests.get(google_url+a0[2])
     if r.status_code == requests.codes.ok:
-      print("request ok")
       soup = BeautifulSoup(r.text, 'html.parser')
       items = soup.select('div.g > h3.r > a[href]')
+      if len(items) <= 3:
+        print("WARNING: Can't find the company's registered name.")
+        unsafeScore += 1
       for i in items:
         #print(i.text)
         companyutf8=i.text.encode('utf8')
+        if companyutf8.find("公司簡介") == -1:
+            print("WARNING: Can't find the company's registered name.")
+            unsafeScore += 1
+            break
+
         comp=companyutf8.split('＜')
         compfind=comp[0].find('_')
         if compfind>=0:
@@ -64,14 +72,9 @@ def niz104():
             print i1[1]
             nat(i1[1])
         else:
-            print comp[0]             
+            print comp[0]
             nat(comp[0])
-        #print(compfind)
-        if comp[0] == None:
-            print("company not found")
         break
-    else:
-        print("Company name not found.")
 def nat(compsear):
     s = requests.Session()
     s.keep_alive = False
@@ -96,15 +99,19 @@ def nat(compsear):
     GUI_url = "https://findbiz.nat.gov.tw"+ soup.select(".hover")[0]["href"]
     GUI_res = s.get(GUI_url, headers = headers)
     GUI_soup = BeautifulSoup(GUI_res.text, "lxml")
-    table = GUI_soup.select(".padding_bo")[0].select(".table-striped")[0].select("tr")  
-    print len(table)
+    table = GUI_soup.select(".padding_bo")[0].select(".table-striped")[0].select("tr")
     for j in range(2):
         table_item = table[j].select("td")[1].text.encode("utf-8").strip()
         ti=table_item.split()
         table_title = table[j].select("td")[0].text.encode("utf-8").strip()
         print table_title+str('   ')+ti[0]
         print('======')
+    global unsafeScore
+    if table_item != "核准設立" or table <= 0:
+        print("WARINING: This company doesn't register in goverment.")
+        unsafeScore += 1
+
 getwhois()
 niz104()
 
-print("end of test.")                                    
+print 'Total unsafe score:', unsafeScore
