@@ -1,39 +1,106 @@
 #!/usr/bin/python
-# -*- coding: UTF-8 -*-
+# -*- coding:utf-8 -*-
 import requests
+import uniout
+import sys
 from bs4 import BeautifulSoup
-a=raw_input("enter url plz:")
-print a
-a0=a.split('/')
-print a0[2]
-def getwhois():
-    whois_url = 'https://who.is/whois/'+a0[2]
+import re
+unsafeScore = 0
+
+def searchall(a):
+    global unsafeScore 
+    unsafeScore = 0
+    a0=a.split('/')
+    getwhois(a0[2])
+    niz104(a0[2])
+    print("||SCORE||")
+    print (unsafeScore)
+    return unsafeScore
+    
+def getwhois(gettext):
+    global unsafeScore
+    print("original score")
+    print(unsafeScore)
+    whois_url = 'https://who.is/whois/'+gettext
     r = requests.get(whois_url)
     if r.status_code == requests.codes.ok:
-      soup = BeautifulSoup(r.text, 'html.parser')
-      stories = soup.find_all('div', class_='col-md-12 queryResponseBodyValue')
-      for s in stories:
-        print(s.text)
-def niz104():
-    google_url = 'https://www.google.com.tw/search?q=site:www.104.com.tw+ '
-    r = requests.get(google_url+a0[2])
-    if r.status_code == requests.codes.ok:
-      soup = BeautifulSoup(r.text, 'html.parser')
-      items = soup.select('div.g > h3.r > a[href]')
-      for i in items:
-        #print(i.text)
-        companyutf8=i.text.encode('utf8')
-        comp=companyutf8.split('＜')
-        compfind=comp[0].find('_')
-        if compfind>=0:
-            i1=comp[0].split('_')
-            print i1[1]
-            nat(i1[1])
+        soup = BeautifulSoup(r.text, 'html.parser')
+        stories = soup.find_all('div', class_='col-md-12 queryResponseBodyValue')
+        lookuptw=0
+        lookupdate=0
+        for s in stories:
+            #print(s.text)
+            #check if address is in Taiwan
+            isTaiwan = s.text.find("Taiwan")
+            isTW = s.text.find("Registrant Country: TW")
+            expDate = s.text.find("expir")
+            ExpDate = s.text.find("Expir")
+            upDate = s.text.find('Updated')
+            if isTaiwan != -1 or isTW != -1:
+                lookuptw=1
+
+        if lookuptw==0:
+            print("WARNING: The address this company registerd isn't in Taiwan.")
+            unsafeScore += 1.5
+
+        updDate=s.text.find("-",upDate)
+        upYear = s.text[updDate-4:updDate]
+        #print(upYear)
+
+        if expDate > 0 :
+            Date=s.text.find("-",expDate)
+            expYear=s.text[Date-4:Date]
+            #print(expYear)
+        elif ExpDate > 0:
+            Date=s.text.find("-",ExpDate)
+            expYear=s.text[Date-4:Date]
+            #print(expYear)
         else:
-            print comp[0]
-            nat(comp[0])
-        break
+            print("WARNING: Can't find the certificate's expiry date of this company.")
+            unsafeScore += 1.5
+
+        
+        if expDate > 0 or ExpDate > 0:
+            iexpYear = int(expYear)
+            iupYear = int(upYear)
+            if iexpYear - iupYear <= 1:
+                print("WARNING: The certificate's effective duration is shorter than 1 year.")
+                unsafeScore += 1
+    
+def niz104(gettext):
+    global unsafeScore
+    google_url = 'https://www.google.com.tw/search?q=site:www.104.com.tw+ '
+    r = requests.get(google_url+gettext)
+    if r.status_code == requests.codes.ok:
+        soup = BeautifulSoup(r.text, 'html.parser')
+        items = soup.select('div.g > h3.r > a[href]')
+        if items==[]:
+            print("WARNING: Can not find the company under this website")
+            unsafeScore += 1
+        if len(items) <= 3:
+            print("WARNING: Can't find the company's registered name.")
+            unsafeScore += 1
+        for i in items:
+            companyutf8=i.text.encode('utf8')
+            if companyutf8.find("公司簡介") == -1:
+                print("WARNING: Can't find the company's registered name.")
+                unsafeScore += 1
+                break
+            comp=companyutf8.split('＜')
+            compfind=comp[0].find('_')
+            if compfind>=0:
+                i1=comp[0].split('_')
+                print i1[1].decode("utf-8")
+                nat(i1[1])
+            else:
+                print comp[0].decode("utf-8")
+                nat(comp[0])
+            break
+
+
+
 def nat(compsear):
+    global unsafeScore
     s = requests.Session()
     s.keep_alive = False
     url = "https://findbiz.nat.gov.tw/fts/query/QueryBar/queryInit.do"
@@ -58,14 +125,22 @@ def nat(compsear):
     GUI_res = s.get(GUI_url, headers = headers)
     GUI_soup = BeautifulSoup(GUI_res.text, "lxml")
     table = GUI_soup.select(".padding_bo")[0].select(".table-striped")[0].select("tr")
-    print len(table)
+    #print len(table)
     for j in range(2):
         table_item = table[j].select("td")[1].text.encode("utf-8").strip()
         ti=table_item.split()
+        ti0=ti[0].replace('\xc2\xa0',' ')
         table_title = table[j].select("td")[0].text.encode("utf-8").strip()
-        print table_title+str('   ')+ti[0]
+        print table_title.decode("utf-8")+str('   ').decode("utf-8")+ti0.decode("utf-8")
         print('======')
-getwhois()
-niz104()
+        if j==2 and table_item != "核准設立" or table <= 0:
+            print("WARINING: This company doesn't register in goverment.")
+            unsafeScore += 1
 
-    
+
+
+
+#a=raw_input("enter url plz:")
+
+#getwhois(a)
+#niz104(a)
