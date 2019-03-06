@@ -6,19 +6,23 @@ import sys
 from bs4 import BeautifulSoup
 import re
 unsafeScore = 0
+foo=[]
 
 def searchall(a):
-    global unsafeScore 
+    global unsafeScore ,foo
     unsafeScore = 0
+    foo[:] = []
     a0=a.split('/')
     getwhois(a0[2])
     niz104(a0[2])
     print("||SCORE||")
+    foo.append(unsafeScore)
     print (unsafeScore)
-    return unsafeScore
+    print(foo)
+    return foo
     
 def getwhois(gettext):
-    global unsafeScore
+    global unsafeScore,foo
     print("original score")
     print(unsafeScore)
     whois_url = 'https://who.is/whois/'+gettext
@@ -29,8 +33,7 @@ def getwhois(gettext):
         lookuptw=0
         lookupdate=0
         for s in stories:
-            #print(s.text)
-            #check if address is in Taiwan
+
             isTaiwan = s.text.find("Taiwan")
             isTW = s.text.find("Registrant Country: TW")
             expDate = s.text.find("expir")
@@ -45,36 +48,40 @@ def getwhois(gettext):
 
         updDate=s.text.find("-",upDate)
         upYear = s.text[updDate-4:updDate]
-        #print(upYear)
 
         if expDate > 0 :
             Date=s.text.find("-",expDate)
             expYear=s.text[Date-4:Date]
-            #print(expYear)
         elif ExpDate > 0:
             Date=s.text.find("-",ExpDate)
             expYear=s.text[Date-4:Date]
-            #print(expYear)
         else:
             print("WARNING: Can't find the certificate's expiry date of this company.")
-            unsafeScore += 1.5
+            unsafeScore += 2.5
+            foo.append(0)
+            foo.append(0)
 
-        
+
         if expDate > 0 or ExpDate > 0:
             iexpYear = int(expYear)
             iupYear = int(upYear)
+            expDay = s.text[Date-4:Date+6]
+            upDay = s.text[updDate-4:updDate+6]
+            foo.append(upDay)
+            foo.append(expDay)
             if iexpYear - iupYear <= 1:
                 print("WARNING: The certificate's effective duration is shorter than 1 year.")
                 unsafeScore += 1
     
 def niz104(gettext):
-    global unsafeScore
+    global unsafeScore,foo
     google_url = 'https://www.google.com.tw/search?q=site:www.104.com.tw+ '
     r = requests.get(google_url+gettext)
     if r.status_code == requests.codes.ok:
         soup = BeautifulSoup(r.text, 'html.parser')
         items = soup.select('div.g > h3.r > a[href]')
         if items==[]:
+            foo.append(0)
             print("WARNING: Can not find the company under this website")
             unsafeScore += 1
         if len(items) <= 3:
@@ -83,18 +90,24 @@ def niz104(gettext):
         for i in items:
             companyutf8=i.text.encode('utf8')
             if companyutf8.find("公司簡介") == -1:
+
                 print("WARNING: Can't find the company's registered name.")
                 unsafeScore += 1
+                
                 break
+                
             comp=companyutf8.split('＜')
             compfind=comp[0].find('_')
             if compfind>=0:
                 i1=comp[0].split('_')
                 print i1[1].decode("utf-8")
                 nat(i1[1])
+                foo.append(i1[1].decode("utf-8"))
             else:
                 print comp[0].decode("utf-8")
                 nat(comp[0])
+                foo.append(comp[0].decode("utf-8"))
+
             break
 
 
@@ -139,8 +152,3 @@ def nat(compsear):
 
 
 
-
-#a=raw_input("enter url plz:")
-
-#getwhois(a)
-#niz104(a)

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	chrome.tabs.query({'active': true, 'lastFocusedWindow': true}, function (tabs) {
     var url0 = tabs[0].url;
     $("#msgLabel").text(url0);
-    $.ajax( {              // Flask中获取数据的function的url
+    $.ajax( {              
         type: "POST",
         url: "http://localhost:5000/dataconvector",
         crossDomain:true,
@@ -14,8 +14,8 @@ document.addEventListener('DOMContentLoaded', function () {
             
         }
     }).done(function(responseData){
-        var a=responseData.result
-        var score=a*20+5
+        var a=responseData.result[3]
+        var score=a*20
         $("#text").text("此網站的不信任指數為");
         $("#result").text(score+"%");
         $("#loadingIMG").hide();
@@ -33,6 +33,23 @@ document.addEventListener('DOMContentLoaded', function () {
         
         var src = document.getElementById("emoji");
         src.appendChild(img);
+
+        var update=responseData.result[0]
+        var expire=responseData.result[1]
+        var company=responseData.result[2]
+
+        if(update == "0" || company == "0"){
+            $("#description1").text("未取得相關公司資訊");
+            $("#description2").text("無法得知最後更新與到期日期");        
+        }
+        else{
+            $("#description1").text("公司名稱："+company);
+            $("#description2").text("最後更新日期："+update);
+            $("#description3").text("到期日期："+expire);
+
+
+        }
+
     });
     
 

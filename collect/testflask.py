@@ -13,9 +13,9 @@ def helloWorld():
 def dataConvector():
     mydata = request.get_json(force=True)
     msg=mydata['url']
-    print msg
+    #print msg
     a = searchall(msg)
-    print a
+    #print a
     return jsonify(result=a)
 
 if __name__ == '__main__':
