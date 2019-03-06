@@ -2,19 +2,14 @@ from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 from testsearchforwin import searchall
 from linebot import (
-    LineBotApi, WebhookHandler
-)
+    LineBotApi, WebhookHandler)
 from linebot.exceptions import (
-    InvalidSignatureError
-)
+    InvalidSignatureError)
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage, ImageSendMessage
-)
+    MessageEvent, TextMessage, TextSendMessage, ImageSendMessage)
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
-
-
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -30,31 +25,24 @@ def callback():
         handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
-
     return 'OK'
-
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     a = searchall(event.message.text) 
-
     if(a[0]!=0):
         line_bot_api.reply_message(
             event.reply_token,[
             #TextSendMessage(text=event.message.text),
-            TextSendMessage(text="¦MÀI«ü¼Æ¡G" + a[3] + "%"),
-            TextSendMessage(text="¤½¥q¸ê°T¡G"+a[2]+"\n³Ì«á§ó·s¡G"+a[0]+"\n¨ì´Á¤é´Á¡G"+a[1]),
-            ]
+            TextSendMessage(text="å±éšªæŒ‡æ•¸ï¼š" + a[3] + "%"),
+            TextSendMessage(text="å…¬å¸è³‡è¨Šï¼š"+a[2]+"\næœ€å¾Œæ›´æ–°ï¼š"+a[0]+"\nåˆ°æœŸæ—¥æœŸï¼š"+a[1])]
         )
-    
     else:
         line_bot_api.reply_message(
             event.reply_token,[
             TextSendMessage(text=event.message.text),
-            TextSendMessage(text="µLªk±oª¾¤½¥q¸ê°T")
-            ]
+            TextSendMessage(text="ç„¡æ³•å¾—çŸ¥å…¬å¸è³‡è¨Š")]
         )
-
 
 if __name__ == "__main__":
     app.run()
