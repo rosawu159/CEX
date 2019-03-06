@@ -33,7 +33,6 @@ def getwhois(gettext):
         lookuptw=0
         lookupdate=0
         for s in stories:
-
             isTaiwan = s.text.find("Taiwan")
             isTW = s.text.find("Registrant Country: TW")
             expDate = s.text.find("expir")
@@ -41,14 +40,11 @@ def getwhois(gettext):
             upDate = s.text.find('Updated')
             if isTaiwan != -1 or isTW != -1:
                 lookuptw=1
-
         if lookuptw==0:
             print("WARNING: The address this company registerd isn't in Taiwan.")
             unsafeScore += 1.5
-
         updDate=s.text.find("-",upDate)
         upYear = s.text[updDate-4:updDate]
-
         if expDate > 0 :
             Date=s.text.find("-",expDate)
             expYear=s.text[Date-4:Date]
@@ -60,8 +56,6 @@ def getwhois(gettext):
             unsafeScore += 2.5
             foo.append(0)
             foo.append(0)
-
-
         if expDate > 0 or ExpDate > 0:
             iexpYear = int(expYear)
             iupYear = int(upYear)
@@ -90,12 +84,9 @@ def niz104(gettext):
         for i in items:
             companyutf8=i.text.encode('utf8')
             if companyutf8.find("公司簡介") == -1:
-
                 print("WARNING: Can't find the company's registered name.")
                 unsafeScore += 1
-                
                 break
-                
             comp=companyutf8.split('＜')
             compfind=comp[0].find('_')
             if compfind>=0:
@@ -107,10 +98,7 @@ def niz104(gettext):
                 print comp[0].decode("utf-8")
                 nat(comp[0])
                 foo.append(comp[0].decode("utf-8"))
-
             break
-
-
 
 def nat(compsear):
     global unsafeScore
@@ -149,6 +137,3 @@ def nat(compsear):
         if j==2 and table_item != "核准設立" or table <= 0:
             print("WARINING: This company doesn't register in goverment.")
             unsafeScore += 1
-
-
-
