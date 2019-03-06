@@ -1,17 +1,28 @@
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 from testsearchforwin import searchall
-from linebot import (LineBotApi, WebhookHandler)
-from linebot.exceptions import (InvalidSignatureError)
-from linebot.models import (MessageEvent, TextMessage, TextSendMessage, ImageSendMessage)
+from linebot import (
+    LineBotApi, WebhookHandler
+)
+from linebot.exceptions import (
+    InvalidSignatureError
+)
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage, ImageSendMessage
+)
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
+
+line_bot_api = LineBotApi('lPZrWaAs+laA1syJBXiHWRggMCp3ycjzBVDjvdL2coi/iOYivCqO3cBD+n0nmmlylAh995ATKmcTOo3hxOGuYe1EQWiJ4WUcG1PR91X2hfNvOCF/42UW+JHe1Ls0CKVlFKuAu8i0AxQG4qaLcImg5wdB04t89/1O/w1cDnyilFU=')
+handler = WebhookHandler('d153cf07677f8f14f7aeed20ee3aa39b')
+
 
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
+
     # get request body as text
     body = request.get_data(as_text=True)
     app.logger.info("Request body: " + body)
@@ -21,22 +32,31 @@ def callback():
         handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
+
     return 'OK'
+
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     a = searchall(event.message.text) 
+
     if(a[0]!=0):
         line_bot_api.reply_message(
             event.reply_token,[
             #TextSendMessage(text=event.message.text),
-            TextSendMessage(text="å±éšªæŒ‡æ•¸ï¼š" + a[3] + "%"),
-            TextSendMessage(text="å…¬å¸è³‡è¨Šï¼š"+a[2]+"\næœ€å¾Œæ›´æ–°ï¼š"+a[0]+"\nåˆ°æœŸæ—¥æœŸï¼š"+a[1])])
+            TextSendMessage(text="¦MÀI«ü¼Æ¡G" + a[3] + "%"),
+            TextSendMessage(text="¤½¥q¸ê°T¡G"+a[2]+"\n³Ì«á§ó·s¡G"+a[0]+"\n¨ì´Á¤é´Á¡G"+a[1]),
+            ]
+        )
+    
     else:
         line_bot_api.reply_message(
             event.reply_token,[
             TextSendMessage(text=event.message.text),
-            TextSendMessage(text="ç„¡æ³•å¾—çŸ¥å…¬å¸è³‡è¨Š")])
+            TextSendMessage(text="µLªk±oª¾¤½¥q¸ê°T")
+            ]
+        )
+
 
 if __name__ == "__main__":
     app.run()
