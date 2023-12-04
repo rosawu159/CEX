@@ -91,11 +91,11 @@ def niz104(gettext):
             compfind=comp[0].find('_')
             if compfind>=0:
                 i1=comp[0].split('_')
-                print i1[1].decode("utf-8")
+                print (i1[1].decode("utf-8"))
                 nat(i1[1])
                 foo.append(i1[1].decode("utf-8"))
             else:
-                print comp[0].decode("utf-8")
+                print (comp[0].decode("utf-8"))
                 nat(comp[0])
                 foo.append(comp[0].decode("utf-8"))
             break
@@ -132,7 +132,7 @@ def nat(compsear):
         ti=table_item.split()
         ti0=ti[0].replace('\xc2\xa0',' ')
         table_title = table[j].select("td")[0].text.encode("utf-8").strip()
-        print table_title.decode("utf-8")+str('   ').decode("utf-8")+ti0.decode("utf-8")
+        print (table_title.decode("utf-8")+str('   ').decode("utf-8")+ti0.decode("utf-8"))
         print('======')
         if j==2 and table_item != "核准設立" or table <= 0:
             print("WARINING: This company doesn't register in goverment.")

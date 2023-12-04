@@ -12,6 +12,7 @@ def helloWorld():
 @app.route('/dataconvector', methods=['POST'])
 def dataConvector():
     mydata = request.get_json(force=True)
+    print(mydata)
     msg=mydata['url']
     #print msg
     a = searchall(msg)

@@ -1,6 +1,6 @@
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-from testsearchforwin import searchall
+from collect.testsearchforwin import searchall
 from linebot import (
     LineBotApi, WebhookHandler
 )
