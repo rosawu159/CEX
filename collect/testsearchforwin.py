@@ -3,6 +3,8 @@
 import requests
 import uniout
 import sys
+import json
+
 from bs4 import BeautifulSoup
 import re
 unsafeScore = 0
@@ -13,8 +15,10 @@ def searchall(a):
     unsafeScore = 0
     foo[:] = []
     a0=a.split('/')
+    print('a0',a0)
     getwhois(a0[2])
     niz104(a0[2])
+    
     print("||SCORE||")
     foo.append(unsafeScore)
     print (unsafeScore)
@@ -69,71 +73,32 @@ def getwhois(gettext):
     
 def niz104(gettext):
     global unsafeScore,foo
-    google_url = 'https://www.google.com.tw/search?q=site:www.104.com.tw+ '
+    google_url = 'https://www.google.com.tw/search?q=site:www.twincn.com+ '
     r = requests.get(google_url+gettext)
     if r.status_code == requests.codes.ok:
         soup = BeautifulSoup(r.text, 'html.parser')
-        items = soup.select('div.g > h3.r > a[href]')
-        if items==[]:
-            foo.append(0)
+        try:
+            company_soup = soup.h3.div
+        except:
             print("WARNING: Can not find the company under this website")
             unsafeScore += 1
-        if len(items) <= 3:
-            print("WARNING: Can't find the company's registered name.")
-            unsafeScore += 1
-        for i in items:
-            companyutf8=i.text.encode('utf8')
-            if companyutf8.find("公司簡介") == -1:
-                print("WARNING: Can't find the company's registered name.")
-                unsafeScore += 1
-                break
-            comp=companyutf8.split('＜')
-            compfind=comp[0].find('_')
-            if compfind>=0:
-                i1=comp[0].split('_')
-                print (i1[1].decode("utf-8"))
-                nat(i1[1])
-                foo.append(i1[1].decode("utf-8"))
-            else:
-                print (comp[0].decode("utf-8"))
-                nat(comp[0])
-                foo.append(comp[0].decode("utf-8"))
-            break
+        a = str(company_soup).split(">")
+        b = a[1].split()
+        nat(b[0])
+
 
 def nat(compsear):
-    global unsafeScore
+    global unsafeScore    
     s = requests.Session()
-    s.keep_alive = False
-    url = "https://findbiz.nat.gov.tw/fts/query/QueryBar/queryInit.do"
-    s.get(url)
-    url = "https://findbiz.nat.gov.tw/fts/query/QueryList/queryList.do"
-    payload = {
-                "validatorOpen":"N",
-                "rlPermit":"0",
-                "qryCond":compsear,
-                "infoType":"D",
-                "qryType":"cmpyType",
-                "cmpyType":"true",
-                "isAlive":"all",
-    }
-    headers= {
-    'Content-Type': 'application/x-www-form-urlencoded',
-    'Referer':'https://findbiz.nat.gov.tw/fts/query/QueryList/queryList.do'
-}
-    res=s.post(url,data=payload,headers=headers)
-    soup=BeautifulSoup(res.text,'html.parser')
-    GUI_url = "https://findbiz.nat.gov.tw"+ soup.select(".hover")[0]["href"]
-    GUI_res = s.get(GUI_url, headers = headers)
-    GUI_soup = BeautifulSoup(GUI_res.text, "lxml")
-    table = GUI_soup.select(".padding_bo")[0].select(".table-striped")[0].select("tr")
-    #print len(table)
-    for j in range(2):
-        table_item = table[j].select("td")[1].text.encode("utf-8").strip()
-        ti=table_item.split()
-        ti0=ti[0].replace('\xc2\xa0',' ')
-        table_title = table[j].select("td")[0].text.encode("utf-8").strip()
-        print (table_title.decode("utf-8")+str('   ').decode("utf-8")+ti0.decode("utf-8"))
-        print('======')
-        if j==2 and table_item != "核准設立" or table <= 0:
-            print("WARINING: This company doesn't register in goverment.")
-            unsafeScore += 1
+    res=s.get('https://data.gcis.nat.gov.tw/od/data/api')
+    try:
+        url = 'https://data.gcis.nat.gov.tw/od/data/api/6BBA2268-1367-4B42-9CCA-BC17499EBE8C?$format=json&$filter=Company_Name like '+ compsear +' and Company_Status eq 01&$skip=0&$top=50'
+        res=s.get(url)
+        print(res)
+    except:
+        None
+    json_data = json.loads(res.text)
+    print(json_data[0]['Company_Status_Desc'])
+    if json_data[0]['Company_Status_Desc'] != '核准登記':
+        print("WARINING: This company doesn't register in goverment.")
+        unsafeScore += 1
