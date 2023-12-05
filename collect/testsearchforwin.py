@@ -11,7 +11,7 @@ import niz104
 
 def searchall(target_url):
     target_domain=target_url.split('/')
-    getwhois_Score, foo = getwhois.getwhois(target_domain[2])
+    getwhois_Score = getwhois.getwhois(target_domain[2])
     niz104_Score = niz104.niz104(target_domain[2])
     print("getwhois_Score:", getwhois_Score)
     print("niz104_Score:", getwhois_Score)

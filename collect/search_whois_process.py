@@ -1,6 +1,13 @@
+#!/usr/bin/python
+# -*- coding:utf-8 -*-
 import requests
-import re
+import uniout
+import sys
+import json
 from bs4 import BeautifulSoup
+import re
+import getwhois
+import niz104
 
 def searching(soup):
     result_dict={}
@@ -12,9 +19,11 @@ def searching(soup):
             result_dict[body.text.strip()] = value.text.strip()
     return result_dict
 
-def getwhois(gettext):
+def work_whois_process(id,target_infomation,result_queue):
+    print("WHO")
+    target_domain=target_infomation.split('/')
     unsafeScore = 0
-    whois_url = 'https://who.is/whois/'+gettext
+    whois_url = 'https://who.is/whois/'+target_domain[2]
     r = requests.get(whois_url)
     if r.status_code != requests.codes.ok:
         result = "Not Available Now."
@@ -28,4 +37,6 @@ def getwhois(gettext):
     if expYear-upYear <= 1:
         print("WARNING: The certificate's effective duration is shorter than 1 year.")
         unsafeScore += 1
-    return unsafeScore
+    print("WHO", unsafeScore)
+
+    result_queue.put(unsafeScore)
