@@ -4,6 +4,7 @@ from testsearchforwin import searchall
 from search_whois_process import work_whois_process
 from search_nat104_process import work_nat104_process
 import multiprocessing
+from queue import Queue
 
 app = Flask(__name__)
 CORS(app, resources=r'/*')
@@ -19,6 +20,8 @@ def dataConvector():
     #a = searchall(target_infomation)
      
     result_queue = multiprocessing.Queue()
+    #nat_queue = Queue()
+
     processes = []
     process_whois = multiprocessing.Process(target=work_whois_process, args=(0,target_infomation,result_queue))
     process_nat104 = multiprocessing.Process(target=work_nat104_process, args=(1,target_infomation,result_queue))
@@ -30,8 +33,10 @@ def dataConvector():
     results = []
     while not result_queue.empty():
         results.append(result_queue.get())
+    for iu in results:
+      print(iu)
 
-    return jsonify(result=sum(results))
+    return jsonify(result=results)
 
 if __name__ == '__main__':
     app.run(threaded=True)

@@ -38,5 +38,7 @@ def work_whois_process(id,target_infomation,result_queue):
         print("WARNING: The certificate's effective duration is shorter than 1 year.")
         unsafeScore += 1
     print("WHO", unsafeScore)
+    whois_score_dict = {'whois_score': unsafeScore}
 
-    result_queue.put(unsafeScore)
+
+    result_queue.put(whois_score_dict)
