@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
         data: JSON.stringify({"url":url0}),
         dataType:"JSON",
         beforeSend: function(){
-            $("#text").text("正在計算網站的不信任指數...");
+            $("#text").text("正在計算網站的不信任指數...？？？");
             $("#loadingIMG").show();
             
         }

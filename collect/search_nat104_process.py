@@ -16,18 +16,20 @@ def nat(compsear, unsafeScore):
     try:
         url = 'https://data.gcis.nat.gov.tw/od/data/api/6BBA2268-1367-4B42-9CCA-BC17499EBE8C?$format=json&$filter=Company_Name like '+ compsear +' and Company_Status eq 01&$skip=0&$top=50'
         response=session.get(url)
+        json_data = response.json()
+        print("JR", json_data)
     except:
         None
-    json_data = response.json()
-    nat_dict={}
-    nat_dict['Business_NO']=json_data[0]['Business_Accounting_NO']
-    nat_dict['Register_Organization']=json_data[0]['Register_Organization_Desc']
-    nat_dict['Company_Date']=json_data[0]['Company_Setup_Date']
+    if json_data != None:
+        nat_dict={}
+        nat_dict['Business_NO']=json_data[0]['Business_Accounting_NO']
+        nat_dict['Register_Organization']=json_data[0]['Register_Organization_Desc']
+        nat_dict['Company_Date']=json_data[0]['Company_Setup_Date']
 
-    if json_data[0]['Company_Status_Desc'] != '核准登記':
-        print("WARINING: This company doesn't register in government.")
-        unsafeScore += 1
-    return unsafeScore, nat_dict
+        if json_data[0]['Company_Status_Desc'] != '核准登記':
+            print("WARINING: This company doesn't register in government.")
+            unsafeScore += 1
+        return unsafeScore, nat_dict
 
 
 
@@ -74,6 +76,7 @@ def work_nat104_process(id,target_infomation,result_queue):
     else:
         return None
     company_title_soup = str(company_soup).split(">")
+    print("company_title_soup", company_title_soup)
     company_title = company_title_soup[1].split()
     unsafeScore, nat_dict = nat(company_title[0], unsafeScore)
     print("NAT", unsafeScore)
