@@ -5,8 +5,6 @@ import sys
 import json
 from bs4 import BeautifulSoup
 import re
-import getwhois
-import niz104
 
 def searching(soup):
     result_dict={}

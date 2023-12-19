@@ -5,7 +5,6 @@ import sys
 import json
 from bs4 import BeautifulSoup
 import re
-import niz104
 import threading
 from queue import Queue
 
