@@ -72,7 +72,7 @@ def work_nat104_process(id,target_infomation,result_queue):
             print("WARNING: Can not find the company under this website")
             unsafeScore += 1
     else:
-        return None
+        company_soup = None
     company_title_soup = str(company_soup).split(">")
     print("company_title_soup", company_title_soup)
     company_title = company_title_soup[1].split()
