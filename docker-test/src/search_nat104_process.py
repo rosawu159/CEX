@@ -17,7 +17,7 @@ def nat(compsear, unsafeScore):
         json_data = response.json()
         print("JR", json_data)
     except:
-        None
+        json_data = None
     if json_data != None:
         nat_dict={}
         nat_dict['Business_NO']=json_data[0]['Business_Accounting_NO']

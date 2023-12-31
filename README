@@ -1,0 +1,5 @@
+# cd docker-test
+"docker-compose up"
+
+# cd collect
+"flask run"
